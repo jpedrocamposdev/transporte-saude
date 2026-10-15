@@ -69,6 +69,8 @@ transporte-saude/
 
 ### 1. Clonar o repositório
 
+No terminal, execute:
+
 ```bash
 git clone https://github.com/jpedrocamposdev/transporte-saude.git
 cd transporte-saude
@@ -88,7 +90,7 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-### 4. Instalar o Flask
+### 4. Instalar as dependências
 
 ```powershell
 python -m pip install Flask
@@ -104,7 +106,7 @@ python app.py
 
 Acesse a aplicação pelo navegador:
 
-http://127.0.0.1:5000
+[http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 **Observação:** o banco de dados disponibilizado no repositório é destinado à demonstração e deve conter apenas dados fictícios. Recomenda-se manter uma cópia local antes de realizar testes que alterem ou excluam registros.
 
