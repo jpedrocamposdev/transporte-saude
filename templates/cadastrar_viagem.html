@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Viagem - Transporte Saúde</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            200: '#a7f3d0',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen font-sans antialiased pb-12">
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-md shadow-brand-600/20">
+                    <i data-lucide="hospital" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-900 text-base sm:text-lg leading-tight">Transporte Saúde</h1>
+                    <p class="text-xs text-slate-500 font-medium">Gestão de Agendamentos</p>
+                </div>
+            </a>
+
+            <a href="/" class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl transition-all">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                <span>Voltar ao Painel</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            
+            <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex items-start gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center shrink-0 shadow-sm">
+                    <i data-lucide="calendar-plus" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Agendar Nova Viagem</h2>
+                    <p class="text-sm text-slate-500 mt-0.5">Preencha os dados da saída sanitária e motorista responsável.</p>
+                </div>
+            </div>
+
+            {% if mensagem %}
+                <div class="m-6 p-4 rounded-xl flex items-center gap-3 text-sm font-medium {% if 'Erro' in mensagem %}bg-red-50 text-red-700 border border-red-200{% else %}bg-brand-50 text-brand-800 border border-brand-200{% endif %}">
+                    <i data-lucide="{% if 'Erro' in mensagem %}alert-circle{% else %}check-circle-2{% endif %}" class="w-5 h-5 shrink-0"></i>
+                    <span>{{ mensagem }}</span>
+                </div>
+            {% endif %}
+
+            <form method="POST" class="p-6 sm:p-8 space-y-6">
+
+                <!-- Data e hora -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Data da Viagem <span class="text-brand-600">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i data-lucide="calendar" class="w-4 h-4"></i>
+                            </div>
+                            <input type="date" id="campoData" name="data" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none text-sm text-slate-800 font-medium">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Hora de Saída <span class="text-brand-600">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i data-lucide="clock" class="w-4 h-4"></i>
+                            </div>
+                            <input type="time" id="campoHora" name="hora_saida" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none text-sm text-slate-800 font-medium">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ponto de Saída -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Ponto de Saída <span class="text-brand-600">*</span></label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="map-pin" class="w-4 h-4"></i>
+                        </div>
+                        <input type="text" name="ponto" required placeholder="Ex: Posto de Saúde Central" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none text-sm text-slate-800 font-medium">
+                    </div>
+                </div>
+
+                <!-- Hospital -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Hospital / Destino de Saúde <span class="text-brand-600">*</span></label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="building-2" class="w-4 h-4"></i>
+                        </div>
+                        <select id="selectHospital" name="hospital" required class="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none text-sm text-slate-800 font-semibold appearance-none cursor-pointer">
+                            <option value="" selected disabled>Selecione o hospital...</option>
+                            {% for h in hospitais %}
+                                {% set h_id = h['id'] if (h is mapping and 'id' in h) else (h.id if h.id is defined else h[0]) %}
+                                {% set h_nome = h['nome'] if (h is mapping and 'nome' in h) else (h.nome if h.nome is defined else h[1]) %}
+                                {% set h_cidade = h['cidade'] if (h is mapping and 'cidade' in h) else (h.cidade if h.cidade is defined else h[2]) %}
+                                {% set h_endereco = h['endereco'] if (h is mapping and 'endereco' in h) else (h.endereco if h.endereco is defined else '') %}
+                                <option value="{{ h_id }}" data-cidade="{{ h_cidade }}" data-endereco="{{ h_endereco }}">
+                                    {{ h_nome }} - {{ h_cidade }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Endereço / Destino Completo -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Endereço do Destino <span class="text-brand-600">*</span></label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="navigation" class="w-4 h-4"></i>
+                        </div>
+                        <input type="text" id="campoDestino" name="destino" required placeholder="Endereço completo obtido automaticamente ao selecionar o hospital" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none text-sm text-slate-800 font-medium">
+                    </div>
+                </div>
+
+                <!-- CAMPO DE OBSERVAÇÕES DA VIAGEM / PASSAGEIRO -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Observações / Necessidades (Opcional)</label>
+                    <div class="relative">
+                        <div class="absolute top-3.5 left-0 pl-3.5 flex items-start pointer-events-none text-slate-400">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                        </div>
+                        <textarea name="observacao" rows="2" placeholder="Ex: Leva acompanhante, precisa de ajuda para embarcar, bagagem volumosa, ligar ao chegar..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none text-sm text-slate-800 font-medium resize-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Motorista e Veículo -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Motorista Responsável <span class="text-brand-600">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                            </div>
+                            <select name="motorista" required class="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none text-sm text-slate-800 font-semibold appearance-none cursor-pointer">
+                                <option value="" selected disabled>Selecione...</option>
+                                {% for m in motoristas %}
+                                    {% set m_id = m['id'] if (m is mapping and 'id' in m) else (m.id if m.id is defined else m[0]) %}
+                                    {% set m_nome = m['nome'] if (m is mapping and 'nome' in m) else (m.nome if m.nome is defined else m[1]) %}
+                                    <option value="{{ m_id }}">{{ m_nome }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Veículo <span class="text-brand-600">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i data-lucide="truck" class="w-4 h-4"></i>
+                            </div>
+                            <select name="veiculo" required class="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none text-sm text-slate-800 font-semibold appearance-none cursor-pointer">
+                                <option value="" selected disabled>Selecione...</option>
+                                {% for v in veiculos %}
+                                    {% set v_id = v['id'] if (v is mapping and 'id' in v) else (v.id if v.id is defined else v[0]) %}
+                                    {% set v_tipo = v['tipo'] if (v is mapping and 'tipo' in v) else (v.tipo if v.tipo is defined else v[1]) %}
+                                    {% set v_placa = v['placa'] if (v is mapping and 'placa' in v) else (v.placa if v.placa is defined else v[2]) %}
+                                    <option value="{{ v_id }}">{{ v_tipo }} — Placa: {{ v_placa }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-md shadow-brand-600/20 active:scale-95 text-sm">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        Confirmar Agendamento
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </main>
+
+    <script>
+        const selectHospital = document.getElementById('selectHospital');
+        const campoDestino = document.getElementById('campoDestino');
+
+        selectHospital.addEventListener('change', function() {
+            const opcao = this.options[this.selectedIndex];
+            const cidade = opcao.getAttribute('data-cidade');
+            const endereco = opcao.getAttribute('data-endereco');
+
+            if (endereco && endereco.trim() !== '') {
+                campoDestino.value = `${endereco} — ${cidade}`;
+            } else if (cidade) {
+                campoDestino.value = cidade;
+            }
+        });
+
+        const campoData = document.getElementById('campoData');
+        const campoHora = document.getElementById('campoHora');
+
+        function validarDataEHora() {
+            const agora = new Date();
+            const ano = agora.getFullYear();
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const hojeStr = `${ano}-${mes}-${dia}`;
+
+            campoData.min = hojeStr;
+
+            if (campoData.value === hojeStr) {
+                const horas = String(agora.getHours()).padStart(2, '0');
+                const minutos = String(agora.getMinutes()).padStart(2, '0');
+                const horaAtualStr = `${horas}:${minutos}`;
+
+                campoHora.min = horaAtualStr;
+            } else {
+                campoHora.removeAttribute('min');
+            }
+        }
+
+        campoData.addEventListener('change', validarDataEHora);
+        const hoje = new Date();
+        campoData.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+        validarDataEHora();
+
+        window.onload = function() {
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>

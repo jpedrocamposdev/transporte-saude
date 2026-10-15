@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico de Viagens - Transporte Saúde</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            200: '#a7f3d0',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen font-sans antialiased pb-12">
+
+    <!-- Header / Barra Superior -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-md shadow-brand-600/20">
+                    <i data-lucide="hospital" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-900 text-base sm:text-lg leading-tight">Transporte Saúde</h1>
+                    <p class="text-xs text-slate-500 font-medium">Histórico de Saídas Concluídas</p>
+                </div>
+            </a>
+
+            <div class="flex items-center gap-2">
+                <a href="/" class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl transition-all">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    <span>Voltar ao Painel</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
+
+        <!-- Banner de Título & Botão Limpar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <i data-lucide="history" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Histórico de Viagens</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Registo de viagens e saídas sanitárias passadas</p>
+                </div>
+            </div>
+
+            {% if viagens %}
+            <div>
+                <button type="button" onclick="openClearModal()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 font-bold px-4 py-2.5 rounded-xl border border-red-200 transition-all text-xs active:scale-95">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    Limpar Todo o Histórico
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Tabela Principal -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="list" class="w-4 h-4 text-slate-500"></i>
+                    <h3 class="text-sm font-bold text-slate-900">Viagens Concluídas</h3>
+                </div>
+                <span class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold border border-slate-200">
+                    {{ viagens|length }} Registos
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                            <th class="py-3.5 px-6">Data & Horário</th>
+                            <th class="py-3.5 px-6">Ponto de Saída</th>
+                            <th class="py-3.5 px-6">Hospital / Endereço Destino</th>
+                            <th class="py-3.5 px-6">Motorista</th>
+                            <th class="py-3.5 px-6">Veículo</th>
+                            <th class="py-3.5 px-6 text-right">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-sm">
+                        {% if viagens %}
+                            {% for v in viagens %}
+                                {% set v_id = v['id'] if (v is mapping and 'id' in v) else (v.id if v.id is defined else v[0]) %}
+                                {% set v_data = v['data'] if (v is mapping and 'data' in v) else (v.data if v.data is defined else v[1]) %}
+                                {% set v_hora = v['hora_saida'] if (v is mapping and 'hora_saida' in v) else (v.hora_saida if v.hora_saida is defined else v[2]) %}
+                                {% set v_ponto = v['ponto'] if (v is mapping and 'ponto' in v) else (v.ponto if v.ponto is defined else v[3]) %}
+                                {% set v_destino = v['destino'] if (v is mapping and 'destino' in v) else (v.destino if v.destino is defined else v[4]) %}
+                                {% set v_obs = v['observacao'] if (v is mapping and 'observacao' in v) else (v.observacao if v.observacao is defined else '') %}
+                                {% set v_motorista = v['motorista'] if (v is mapping and 'motorista' in v and v['motorista']) else (v['nome'] if (v is mapping and 'nome' in v and v['nome']) else (v.motorista if (v.motorista is defined and v.motorista) else (v.nome if (v.nome is defined and v.nome) else ''))) %}
+                                {% set v_veiculo = v['veiculo'] if (v is mapping and 'veiculo' in v and v['veiculo']) else (v['placa'] if (v is mapping and 'placa' in v and v['placa']) else (v.veiculo if (v.veiculo is defined and v.veiculo) else (v.placa if (v.placa is defined and v.placa) else ''))) %}
+                                {% set v_hospital = v['hospital'] if (v is mapping and 'hospital' in v) else (v.hospital if v.hospital is defined else '') %}
+                                {% set v_h_endereco = v['hospital_endereco'] if (v is mapping and 'hospital_endereco' in v) else (v.hospital_endereco if v.hospital_endereco is defined else '') %}
+                                {% set v_h_cidade = v['hospital_cidade'] if (v is mapping and 'hospital_cidade' in v) else (v.hospital_cidade if v.hospital_cidade is defined else '') %}
+
+                                <tr class="hover:bg-slate-50/80 transition-colors">
+                                    <!-- Data e Hora -->
+                                    <td class="py-4 px-6">
+                                        <div class="font-semibold text-slate-900">
+                                            {% if v_data and '-' in v_data %}
+                                                {% set d = v_data.split('-') %}
+                                                {{ d[2] }}/{{ d[1] }}/{{ d[0] }}
+                                            {% else %}
+                                                {{ v_data }}
+                                            {% endif %}
+                                        </div>
+                                        <span class="inline-flex items-center gap-1 text-xs text-slate-500 font-medium">
+                                            <i data-lucide="clock" class="w-3 h-3"></i> {{ v_hora }}
+                                        </span>
+                                    </td>
+
+                                    <!-- Ponto de Saída -->
+                                    <td class="py-4 px-6 text-slate-700 font-medium">
+                                        <div class="flex items-center gap-1.5">
+                                            <i data-lucide="map-pin" class="w-4 h-4 text-slate-400"></i>
+                                            <span>{{ v_ponto }}</span>
+                                        </div>
+                                    </td>
+
+                                    <!-- Hospital e Endereço -->
+                                    <td class="py-4 px-6">
+                                        {% if v_hospital %}
+                                            <span class="inline-flex items-center gap-1 bg-sky-50 text-sky-800 border border-sky-200 px-2.5 py-1 rounded-lg text-xs font-semibold mb-1">
+                                                <i data-lucide="building" class="w-3.5 h-3.5"></i>
+                                                {{ v_hospital }}
+                                            </span>
+                                        {% endif %}
+                                        <div class="text-xs text-slate-600 font-medium flex items-center gap-1">
+                                            <i data-lucide="navigation" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+                                            <span>
+                                                {% if v_h_endereco and v_h_cidade %}
+                                                    {{ v_h_endereco }} ({{ v_h_cidade }})
+                                                {% else %}
+                                                    {{ v_destino }}
+                                                {% endif %}
+                                            </span>
+                                        </div>
+
+                                        <!-- EXIBIÇÃO DA OBSERVAÇÃO NO HISTÓRICO -->
+                                        {% if v_obs %}
+                                            <div class="mt-1.5 inline-flex items-start gap-1.5 bg-amber-50 text-amber-800 border border-amber-200/80 px-2.5 py-1 rounded-lg text-xs font-medium">
+                                                <i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0"></i>
+                                                <span>{{ v_obs }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+
+                                    <!-- Motorista -->
+                                    <td class="py-4 px-6">
+                                        {% if v_motorista %}
+                                            <div class="flex items-center gap-2 text-slate-800 font-semibold">
+                                                <div class="w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs">
+                                                    <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                                                </div>
+                                                <span>{{ v_motorista }}</span>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-xs text-slate-400 italic">Não atribuído</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <!-- Veículo -->
+                                    <td class="py-4 px-6">
+                                        {% if v_veiculo %}
+                                            <span class="inline-block bg-slate-100 text-slate-800 border border-slate-200 font-medium text-xs px-2.5 py-1 rounded-lg">
+                                                <i data-lucide="truck" class="w-3.5 h-3.5 inline mr-1 text-slate-500"></i>
+                                                {{ v_veiculo }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-xs text-slate-400 italic">Não atribuído</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <!-- Ações -->
+                                    <td class="py-4 px-6 text-right">
+                                        <button type="button" onclick="openDeleteModal('/deletar-viagem/{{ v_id }}', 'esta viagem')"
+                                            class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all" title="Excluir Viagem do Histórico">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="py-12 text-center text-slate-400">
+                                    <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-40"></i>
+                                    <p class="font-bold text-slate-600 text-base">Nenhuma viagem encontrada no histórico.</p>
+                                    <p class="text-xs text-slate-400 mt-1">As viagens concluídas aparecerão automaticamente aqui.</p>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Form Escondido para Limpar Histórico -->
+    <form id="clearHistoryForm" action="{{ url_for('rota_limpar_historico') }}" method="POST" class="hidden"></form>
+
+    <!-- Modal Elegante de Eliminação de Item Único -->
+    <div id="deleteModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 space-y-4">
+            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+                <i data-lucide="trash-2" class="w-6 h-6"></i>
+            </div>
+            <div class="text-center">
+                <h3 class="text-base font-bold text-slate-900">Confirmar Exclusão</h3>
+                <p id="deleteModalText" class="text-xs text-slate-500 mt-1.5 leading-relaxed">Deseja apagar esta viagem?</p>
+            </div>
+            <div class="flex items-center gap-3 pt-2">
+                <button type="button" onclick="closeDeleteModal()" class="w-1/2 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-all">
+                    Cancelar
+                </button>
+                <a id="confirmDeleteLink" href="#" class="w-1/2 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold text-center shadow-md shadow-red-600/20 transition-all">
+                    Excluir
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Elegante de Limpar Todo o Histórico -->
+    <div id="clearModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 space-y-4">
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            </div>
+            <div class="text-center">
+                <h3 class="text-base font-bold text-slate-900">Limpar Histórico Completo</h3>
+                <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">Tem certeza que deseja apagar <strong>todo</strong> o histórico de viagens? Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="flex items-center gap-3 pt-2">
+                <button type="button" onclick="closeClearModal()" class="w-1/2 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-all">
+                    Cancelar
+                </button>
+                <button type="button" onclick="confirmClearHistory()" class="w-1/2 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 transition-all">
+                    Limpar Tudo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openDeleteModal(url, itemNome) {
+            document.getElementById('deleteModalText').innerHTML = `Tem certeza que deseja apagar <strong>${itemNome}</strong>? Esta ação não pode ser desfeita.`;
+            document.getElementById('confirmDeleteLink').setAttribute('href', url);
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        function openClearModal() {
+            document.getElementById('clearModal').classList.remove('hidden');
+        }
+
+        function closeClearModal() {
+            document.getElementById('clearModal').classList.add('hidden');
+        }
+
+        function confirmClearHistory() {
+            document.getElementById('clearHistoryForm').submit();
+        }
+
+        window.onload = function() {
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>

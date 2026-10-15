@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Motorista - Transporte Saúde</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            200: '#a7f3d0',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .badge-pop {
+            animation: pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes pop {
+            0% { transform: scale(0.85); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen font-sans antialiased pb-12">
+
+    <!-- Navbar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-md shadow-brand-600/20">
+                    <i data-lucide="hospital" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-900 text-base sm:text-lg leading-tight">Transporte Saúde</h1>
+                    <p class="text-xs text-slate-500 font-medium">Gestão de Frotas & Condutores</p>
+                </div>
+            </a>
+
+            <a href="/" class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl transition-all">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                <span>Voltar ao Painel</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+
+        <!-- Form Card Container -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            
+            <!-- Card Header -->
+            <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex items-start gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center shrink-0 shadow-sm">
+                    <i data-lucide="id-card" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Cadastrar Motorista</h2>
+                    <p class="text-sm text-slate-500 mt-0.5">Adicione um novo condutor ao sistema de transporte sanitário.</p>
+                </div>
+            </div>
+
+            <!-- Flash / Mensagem Flask -->
+            {% if mensagem %}
+                <div class="m-6 p-4 rounded-xl flex items-center gap-3 text-sm font-medium {% if 'Erro' in mensagem %}bg-red-50 text-red-700 border border-red-200{% else %}bg-brand-50 text-brand-800 border border-brand-200{% endif %}">
+                    <i data-lucide="{% if 'Erro' in mensagem %}alert-circle{% else %}check-circle-2{% endif %}" class="w-5 h-5 shrink-0"></i>
+                    <span>{{ mensagem }}</span>
+                </div>
+            {% endif %}
+
+            <form action="/cadastrar-motorista" method="POST" id="driverForm" class="p-6 sm:p-8 space-y-6">
+
+                <!-- Nome Completo -->
+                <div>
+                    <label for="fullName" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                        Nome Completo <span class="text-brand-600">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="user" class="w-4 h-4"></i>
+                        </div>
+                        <input type="text" id="fullName" name="nome" required placeholder="Ex: Carlos Eduardo da Silva"
+                            class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all outline-none text-slate-800 font-medium text-sm">
+                    </div>
+                </div>
+
+                <!-- CNH Number -->
+                <div>
+                    <label for="cnhNumber" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                        Número da CNH (11 dígitos) <span class="text-brand-600">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="file-badge-2" class="w-4 h-4"></i>
+                        </div>
+                        <input type="text" id="cnhNumber" name="cnh" required maxlength="14" placeholder="Ex: 42067046924" oninput="formatAndValidateCNH(this)"
+                            class="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all outline-none font-mono text-sm text-slate-800">
+                        <div id="cnh-status" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none hidden">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-500"></i>
+                        </div>
+                    </div>
+                    <p id="cnh-feedback" class="text-xs mt-1.5 text-slate-500">Validação pelos dígitos verificadores do DENATRAN.</p>
+                </div>
+
+                <!-- CNH Category Panel -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-brand-700 bg-brand-100 px-2.5 py-0.5 rounded-full">Categoria CNH</span>
+                            <h3 class="text-sm font-bold text-slate-900 mt-1">Selecione as Categorias</h3>
+                        </div>
+
+                        <!-- Live Badge Result -->
+                        <div class="flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-xl border border-slate-200 shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500">Categoria Final:</span>
+                            <span id="computedCategoryBadge" class="inline-flex items-center px-3 py-0.5 rounded-lg text-sm font-extrabold bg-brand-600 text-white shadow-sm badge-pop">
+                                B
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        <!-- Dropdown 4 Wheels -->
+                        <div class="md:col-span-7">
+                            <label for="category4Wheel" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                                Categoria Principal (4 ou mais rodas)
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="car" class="w-4 h-4"></i>
+                                </div>
+                                <select id="category4Wheel" onchange="updateComputedCategory()"
+                                    class="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-slate-800 font-semibold appearance-none outline-none cursor-pointer text-sm">
+                                    <option value="">Selecione...</option>
+                                    <option value="B" selected>B (Carros e Utilitários)</option>
+                                    <option value="C">C (Caminhões e Carga Pesada)</option>
+                                    <option value="D">D (Vans e Ônibus)</option>
+                                    <option value="E">E (Combinados / Carretas)</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Checkbox Moto -->
+                        <div class="md:col-span-5">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Duas ou Três Rodas</label>
+                            <label for="hasMoto" class="flex items-center gap-3 bg-white border border-slate-300 rounded-xl p-2.5 cursor-pointer hover:border-brand-400 transition-all select-none">
+                                <input type="checkbox" id="hasMoto" onchange="updateComputedCategory()"
+                                    class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 cursor-pointer accent-brand-600">
+                                <div class="flex items-center gap-2 text-slate-800 text-sm font-semibold">
+                                    <i data-lucide="bike" class="w-4 h-4 text-brand-600"></i>
+                                    <span>Possui Categoria A (Moto)</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Hidden Input com a categoria resultante -->
+                    <input type="hidden" name="categoria" id="categoriaFinal" required>
+
+                    <!-- CTB Vehicles Permitted Box -->
+                    <div class="bg-white border border-slate-200/80 rounded-xl p-3.5 text-xs flex items-start gap-3">
+                        <div class="mt-0.5 text-brand-600 shrink-0">
+                            <i data-lucide="info" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <span class="font-bold text-slate-800 block mb-0.5">Veículos Permitidos pelo CTB:</span>
+                            <span id="ctbExplanationText" class="text-slate-600 leading-relaxed">
+                                Permite conduzir veículos de passeio e utilitários até 3.500 kg de PBT e no máximo 8 passageiros.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Telefone -->
+                <div>
+                    <label for="phone" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                        Telefone de Contato <span class="text-brand-600">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="phone" class="w-4 h-4"></i>
+                        </div>
+                        <input type="text" id="phone" name="telefone" required maxlength="15" placeholder="(16) 99999-8877" oninput="formatPhone(this)"
+                            class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all outline-none font-mono text-sm text-slate-800">
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="pt-4 flex flex-col sm:flex-row items-center justify-end gap-3 border-t border-slate-100">
+                    <button type="submit" 
+                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-bold px-7 py-3 rounded-xl transition-all shadow-md shadow-brand-600/20 active:scale-95 text-sm">
+                        <i data-lucide="user-check" class="w-4 h-4"></i>
+                        Salvar Motorista
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </main>
+
+    <script>
+        const ctbDescriptions = {
+            'A': 'Permite pilotar veículos de 2 ou 3 rodas (motocicletas e triciclos).',
+            'B': 'Permite conduzir veículos de passeio e utilitários leves até 8 passageiros.',
+            'AB': 'Permite pilotar motocicletas (A) e veículos de passeio/utilitários (B).',
+            'C': 'Permite conduzir veículos de carga acima de 3.500 kg (caminhões).',
+            'AC': 'Permite pilotar motocicletas (A) e caminhões de carga pesada (C).',
+            'D': 'Permite conduzir vans, micro-ônibus e ônibus de passageiros.',
+            'AD': 'Permite pilotar motocicletas (A) e conduzir ônibus, vans e caminhões (D).',
+            'E': 'Permite conduzir carretas, articulados e reboques pesados.',
+            'AE': 'Permite pilotar motocicletas (A) e conduzir carretas, ônibus e caminhões (E).'
+        };
+
+        function isValidCNH(cnh) {
+            cnh = String(cnh).replace(/\D/g, '');
+            if (cnh.length !== 11 || /^(\d)\1{10}$/.test(cnh)) return false;
+            let sum1 = 0, sum2 = 0;
+            for (let i = 0, j = 9, k = 1; i < 9; i++, j--, k++) {
+                sum1 += parseInt(cnh.charAt(i), 10) * j;
+                sum2 += parseInt(cnh.charAt(i), 10) * k;
+            }
+            let d1 = sum1 % 11;
+            let incr = 0;
+            if (d1 >= 10) { d1 = 0; incr = 2; }
+            let d2 = sum2 % 11;
+            if (d2 >= 10) { d2 = 0; } else { d2 = d2 - incr; }
+            if (d2 < 0) d2 += 11;
+            return (d1 === parseInt(cnh.charAt(9), 10) && d2 === parseInt(cnh.charAt(10), 10));
+        }
+
+        function formatAndValidateCNH(input) {
+            let v = input.value.replace(/\D/g, '');
+            if (v.length > 11) v = v.substring(0, 11);
+            input.value = v;
+
+            const feedback = document.getElementById('cnh-feedback');
+            const statusIcon = document.getElementById('cnh-status');
+
+            if (v.length === 11) {
+                if (isValidCNH(v)) {
+                    input.classList.remove('border-slate-200', 'border-red-500');
+                    input.classList.add('border-brand-500');
+                    statusIcon.classList.remove('hidden');
+                    feedback.textContent = '✓ CNH válida pelo algoritmo do DENATRAN!';
+                    feedback.className = 'text-xs mt-1.5 text-brand-600 font-semibold';
+                } else {
+                    input.classList.remove('border-slate-200', 'border-brand-500');
+                    input.classList.add('border-red-500');
+                    statusIcon.classList.add('hidden');
+                    feedback.textContent = '✕ Número de CNH inválido (Dígitos verificadores incorretos).';
+                    feedback.className = 'text-xs mt-1.5 text-red-500 font-semibold';
+                }
+            } else {
+                input.classList.remove('border-brand-500', 'border-red-500');
+                input.classList.add('border-slate-200');
+                statusIcon.classList.add('hidden');
+                feedback.textContent = 'Validação pelos dígitos verificadores do DENATRAN.';
+                feedback.className = 'text-xs mt-1.5 text-slate-500';
+            }
+        }
+
+        function formatPhone(input) {
+            let v = input.value.replace(/\D/g, '');
+            if (v.length > 11) v = v.substring(0, 11);
+
+            if (v.length === 11) {
+                v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+            } else if (v.length > 6) {
+                v = v.replace(/^(\d{2})(\d{4})(\d{1,4})$/, '($1) $2-$3');
+            } else if (v.length > 2) {
+                v = v.replace(/^(\d{2})(\d{1,4})$/, '($1) $2');
+            } else if (v.length > 0) {
+                v = v.replace(/^(\d{1,2})$/, '($1');
+            }
+            
+            input.value = v;
+        }
+
+        function updateComputedCategory() {
+            const cat4 = document.getElementById('category4Wheel').value;
+            const hasMoto = document.getElementById('hasMoto').checked;
+            const badge = document.getElementById('computedCategoryBadge');
+            const hiddenInput = document.getElementById('categoriaFinal');
+            const ctbText = document.getElementById('ctbExplanationText');
+
+            let finalCat = 'B';
+            if (!cat4 && hasMoto) finalCat = 'A';
+            else if (cat4 && !hasMoto) finalCat = cat4;
+            else if (cat4 && hasMoto) finalCat = 'A' + cat4;
+
+            badge.textContent = finalCat;
+            hiddenInput.value = finalCat;
+
+            badge.classList.remove('badge-pop');
+            void badge.offsetWidth;
+            badge.classList.add('badge-pop');
+
+            if (ctbDescriptions[finalCat]) {
+                ctbText.textContent = ctbDescriptions[finalCat];
+            }
+        }
+
+        document.getElementById('driverForm').addEventListener('submit', function(e) {
+            updateComputedCategory();
+            const cnhInput = document.getElementById('cnhNumber');
+            if (!isValidCNH(cnhInput.value)) {
+                e.preventDefault();
+                alert('Por favor, informe uma CNH válida antes de salvar.');
+            }
+        });
+
+        window.onload = function() {
+            updateComputedCategory();
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>
